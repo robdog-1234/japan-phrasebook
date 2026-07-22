@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#bc002d">
+<title>Japan Phrasebook</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Japan">
+<style>
+  :root{
+    --bg:#f7f3e9; --card:#fffdf7; --ink:#1c1a17; --muted:#6b655c;
+    --line:#e7e0d2; --red:#bc002d; --red-soft:#fbe9ec; --accent:#0a6b6b;
+    --shadow:0 1px 2px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141210; --card:#1f1c19; --ink:#f2ede3; --muted:#a49c8e;
+      --line:#332e28; --red:#ff5a76; --red-soft:#31191f; --accent:#5fd0d0;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink); font-size:17px; line-height:1.4;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  }
+  header{
+    position:sticky; top:0; z-index:10; background:var(--bg);
+    padding:14px 16px 8px; border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .sun{width:26px;height:26px;border-radius:50%;background:var(--red);flex:none}
+  h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.2px}
+  h1 small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
+  #search{
+    width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);font-size:16px;outline:none;
+  }
+  #search:focus{border-color:var(--red)}
+  .voicebar{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .voicebar label{font-size:12.5px;color:var(--muted);font-weight:600;flex:none}
+  .voicebar select{
+    flex:1;min-width:0;padding:8px 10px;border-radius:10px;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);font-size:13.5px;outline:none;
+  }
+  .voicebar select:focus{border-color:var(--red)}
+  .voicebar .test{
+    flex:none;border:1px solid var(--line);background:var(--card);color:var(--red);
+    border-radius:10px;padding:8px 11px;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 12px 4px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);
+    padding:7px 13px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;
+  }
+  .tab.active{background:var(--red);border-color:var(--red);color:#fff}
+  main{padding:8px 12px 40px;max-width:640px;margin:0 auto}
+  .sec-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:20px 6px 8px}
+  .sec-title:first-child{margin-top:6px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:13px 14px;margin-bottom:9px;box-shadow:var(--shadow);
+    display:flex;align-items:center;gap:12px;
+  }
+  .card .txt{flex:1;min-width:0}
+  .jp{font-size:22px;font-weight:600;line-height:1.25}
+  .romaji{font-size:14px;color:var(--accent);font-weight:600;margin-top:2px}
+  .en{font-size:14px;color:var(--muted);margin-top:2px}
+  .note{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:4px}
+  .say{
+    flex:none;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+    background:var(--red-soft);color:var(--red);display:grid;place-items:center;
+    font-size:20px;transition:transform .08s;
+  }
+  .say:active{transform:scale(.9)}
+  .say.playing{background:var(--red);color:#fff}
+  /* Reading (signs) grid */
+  .reading-help{font-size:13.5px;color:var(--muted);margin:4px 6px 12px}
+  .toggle{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);margin:0 6px 12px;cursor:pointer;user-select:none}
+  .toggle input{width:34px;height:20px;appearance:none;background:var(--line);border-radius:999px;position:relative;outline:none;cursor:pointer;flex:none}
+  .toggle input:checked{background:var(--red)}
+  .toggle input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+  .toggle input:checked::after{left:16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .sign{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 12px;text-align:center;box-shadow:var(--shadow);cursor:pointer;position:relative;
+  }
+  .sign .big{font-size:34px;font-weight:700;line-height:1.15}
+  .sign .r{font-size:14px;color:var(--accent);font-weight:600;margin-top:6px}
+  .sign .e{font-size:13px;color:var(--muted);margin-top:1px}
+  .sign .say{position:absolute;top:8px;right:8px;width:34px;height:34px;font-size:15px}
+  body.quiz .sign .r,body.quiz .sign .e{visibility:hidden}
+  body.quiz .sign.revealed .r,body.quiz .sign.revealed .e{visibility:visible}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:15px}
+  .tip{background:var(--red-soft);border-radius:12px;padding:11px 13px;font-size:13px;color:var(--muted);margin:2px 6px 14px;line-height:1.45}
+  .tip b{color:var(--ink)}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 20px 30px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="sun"></div>
+    <h1>Japan Phrasebook<small>Tap 🔊 to hear it · works offline</small></h1>
+  </div>
+  <input id="search" type="search" placeholder="Search English, romaji, or Japanese…" autocomplete="off">
+  <div class="voicebar">
+    <label for="voice">🔊 Voice</label>
+    <select id="voice" aria-label="Choose pronunciation voice"></select>
+    <button class="test" id="voiceTest" type="button">Test</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main id="main"></main>
+<footer>Offline travel Japanese · for a friendly Aussie in Japan 🇦🇺→🇯🇵 · have a ripper trip</footer>
+
+<script>
+/* ---------- DATA ---------- */
+const CATS = [
+  {id:"essentials", name:"Essentials",
+   tip:"If you learn ten words, learn these. <b>Sumimasen</b> alone covers “excuse me”, “sorry” and “thanks” — it’s your Swiss-army word. Point at anything and add <b>onegai shimasu</b> to ask for it politely.",
+   items:[
+    {jp:"はい",romaji:"Hai",en:"Yes."},
+    {jp:"いいえ",romaji:"Iie",en:"No."},
+    {jp:"ありがとうございます",romaji:"Arigatō gozaimasu",en:"Thank you (very much)."},
+    {jp:"すみません",romaji:"Sumimasen",en:"Excuse me / sorry / thanks — and to get attention.",note:"Your most-used word in Japan."},
+    {jp:"お願いします",romaji:"Onegai shimasu",en:"Please (when asking for something)."},
+    {jp:"ごめんなさい",romaji:"Gomen nasai",en:"I’m sorry."},
+    {jp:"大丈夫です",romaji:"Daijōbu desu",en:"It’s okay / I’m fine / no worries."},
+    {jp:"分かりました",romaji:"Wakarimashita",en:"I understand / got it."},
+    {jp:"分かりません",romaji:"Wakarimasen",en:"I don’t understand."},
+    {jp:"英語を話せますか",romaji:"Eigo o hanasemasu ka",en:"Do you speak English?"},
+    {jp:"日本語が少し話せます",romaji:"Nihongo ga sukoshi hanasemasu",en:"I speak a little Japanese."},
+    {jp:"これをお願いします",romaji:"Kore o onegai shimasu",en:"This one, please (while pointing)."},
+   ]},
+  {id:"greetings", name:"Greetings",
+   items:[
+    {jp:"こんにちは",romaji:"Konnichiwa",en:"Hello (daytime)."},
+    {jp:"おはようございます",romaji:"Ohayō gozaimasu",en:"Good morning."},
+    {jp:"こんばんは",romaji:"Konbanwa",en:"Good evening."},
+    {jp:"おやすみなさい",romaji:"Oyasuminasai",en:"Good night."},
+    {jp:"さようなら",romaji:"Sayōnara",en:"Goodbye."},
+    {jp:"またね",romaji:"Mata ne",en:"See you / bye (casual)."},
+    {jp:"はじめまして",romaji:"Hajimemashite",en:"Nice to meet you (first time)."},
+    {jp:"よろしくお願いします",romaji:"Yoroshiku onegai shimasu",en:"Pleased to meet you / please be kind to me."},
+    {jp:"お元気ですか",romaji:"Ogenki desu ka",en:"How are you?"},
+    {jp:"元気です",romaji:"Genki desu",en:"I’m well, thanks."},
+    {jp:"お名前は何ですか",romaji:"Onamae wa nan desu ka",en:"What’s your name?"},
+    {jp:"私は…です",romaji:"Watashi wa … desu",en:"I’m … (your name)."},
+   ]},
+  {id:"friendly", name:"Friendly Aussie",
+   tip:"Aussie warmth travels well — a smile and a small nod go a long way. Say where you’re from and watch faces light up. Always ask before photographing people, and never tip (see Eating Out).",
+   items:[
+    {jp:"オーストラリアから来ました",romaji:"Ōsutoraria kara kimashita",en:"I’m from Australia."},
+    {jp:"日本は初めてです",romaji:"Nihon wa hajimete desu",en:"It’s my first time in Japan."},
+    {jp:"日本が大好きです",romaji:"Nihon ga daisuki desu",en:"I love Japan."},
+    {jp:"とても綺麗ですね",romaji:"Totemo kirei desu ne",en:"It’s really beautiful, isn’t it."},
+    {jp:"素晴らしいですね",romaji:"Subarashii desu ne",en:"That’s wonderful."},
+    {jp:"楽しいです",romaji:"Tanoshii desu",en:"I’m having a great time."},
+    {jp:"写真を撮ってもいいですか",romaji:"Shashin o totte mo ii desu ka",en:"May I take a photo?"},
+    {jp:"写真を撮りましょうか",romaji:"Shashin o torimashō ka",en:"Shall I take a photo for you?"},
+    {jp:"一緒に写真いいですか",romaji:"Issho ni shashin ii desu ka",en:"Can we take a photo together?"},
+    {jp:"お会いできて嬉しいです",romaji:"Oai dekite ureshii desu",en:"It was lovely to meet you."},
+    {jp:"気をつけて",romaji:"Ki o tsukete",en:"Take care."},
+    {jp:"良い一日を",romaji:"Yoi ichinichi o",en:"Have a good day."},
+   ]},
+  {id:"hosts", name:"Hosts & Thanks",
+   tip:"For a home-cooked meal: <b>Itadakimasu</b> before you eat, <b>Gochisōsama deshita</b> after — both are genuine thanks for the food and effort. Bringing a small gift (omiyage) is a lovely Aussie-meets-Japan gesture.",
+   items:[
+    {jp:"いただきます",romaji:"Itadakimasu",en:"Said before eating — “I gratefully receive.”"},
+    {jp:"ごちそうさまでした",romaji:"Gochisōsama deshita",en:"Thank you for the meal (said after eating)."},
+    {jp:"とても美味しいです",romaji:"Totemo oishii desu",en:"It’s very delicious."},
+    {jp:"本当に美味しかったです",romaji:"Hontō ni oishikatta desu",en:"It was truly delicious."},
+    {jp:"素晴らしい食事でした",romaji:"Subarashii shokuji deshita",en:"That was a wonderful meal."},
+    {jp:"お招きありがとうございます",romaji:"Omaneki arigatō gozaimasu",en:"Thank you for inviting us."},
+    {jp:"お世話になりました",romaji:"Osewa ni narimashita",en:"Thank you for your kindness / looking after us.",note:"Heartfelt — perfect for hosts as you leave."},
+    {jp:"お邪魔します",romaji:"Ojama shimasu",en:"Said entering someone’s home — “sorry to intrude.”"},
+    {jp:"失礼します",romaji:"Shitsurei shimasu",en:"Excuse me (entering/leaving a room, hanging up)."},
+    {jp:"お土産です",romaji:"Omiyage desu",en:"Here’s a little gift/souvenir (handing it over)."},
+    {jp:"つまらないものですが",romaji:"Tsumaranai mono desu ga",en:"“It’s only a small thing” — humble phrase when giving a gift."},
+    {jp:"心から感謝します",romaji:"Kokoro kara kansha shimasu",en:"I thank you from the bottom of my heart."},
+   ]},
+  {id:"polite", name:"Everyday Polite",
+   items:[
+    {jp:"どうぞ",romaji:"Dōzo",en:"Please, go ahead / here you are."},
+    {jp:"どういたしまして",romaji:"Dō itashimashite",en:"You’re welcome."},
+    {jp:"お先にどうぞ",romaji:"Osaki ni dōzo",en:"After you."},
+    {jp:"結構です",romaji:"Kekkō desu",en:"No thank you (polite decline)."},
+    {jp:"いりません",romaji:"Irimasen",en:"I don’t need it, thanks."},
+    {jp:"もう一度お願いします",romaji:"Mō ichido onegai shimasu",en:"Once more, please."},
+    {jp:"ゆっくりお願いします",romaji:"Yukkuri onegai shimasu",en:"Slowly, please."},
+    {jp:"ちょっと待ってください",romaji:"Chotto matte kudasai",en:"One moment, please."},
+    {jp:"気にしないでください",romaji:"Ki ni shinaide kudasai",en:"Don’t worry about it."},
+    {jp:"問題ないです",romaji:"Mondai nai desu",en:"No problem."},
+    {jp:"どうしましたか",romaji:"Dō shimashita ka",en:"What’s wrong? / What happened?"},
+    {jp:"はい、お願いします",romaji:"Hai, onegai shimasu",en:"Yes please."},
+   ]},
+  {id:"transport", name:"Getting Around",
+   tip:"Grab a <b>Suica</b> or <b>Pasmo</b> IC card and just tap on and off — it works on nearly every train and bus, and at konbini too. Top it up with cash at any station machine.",
+   items:[
+    {jp:"駅はどこですか",romaji:"Eki wa doko desu ka",en:"Where’s the station?"},
+    {jp:"トイレはどこですか",romaji:"Toire wa doko desu ka",en:"Where’s the toilet?"},
+    {jp:"…はどこですか",romaji:"… wa doko desu ka",en:"Where is …?"},
+    {jp:"ここはどこですか",romaji:"Koko wa doko desu ka",en:"Where am I?"},
+    {jp:"この電車は…に行きますか",romaji:"Kono densha wa … ni ikimasu ka",en:"Does this train go to …?"},
+    {jp:"切符はどこで買えますか",romaji:"Kippu wa doko de kaemasu ka",en:"Where can I buy a ticket?"},
+    {jp:"ICカードにチャージしたいです",romaji:"IC kādo ni chāji shitai desu",en:"I’d like to top up my IC card."},
+    {jp:"何番線ですか",romaji:"Nan-ban-sen desu ka",en:"Which platform?"},
+    {jp:"次の電車は何時ですか",romaji:"Tsugi no densha wa nanji desu ka",en:"What time is the next train?"},
+    {jp:"タクシーを呼んでください",romaji:"Takushī o yonde kudasai",en:"Please call a taxi."},
+    {jp:"ここに行きたいです",romaji:"Koko ni ikitai desu",en:"I want to go here (showing a map/address)."},
+    {jp:"空港までお願いします",romaji:"Kūkō made onegai shimasu",en:"To the airport, please (in a taxi)."},
+    {jp:"近いですか",romaji:"Chikai desu ka",en:"Is it near?"},
+    {jp:"歩いて行けますか",romaji:"Aruite ikemasu ka",en:"Can I walk there?"},
+    {jp:"まっすぐ / 右 / 左",romaji:"Massugu / Migi / Hidari",en:"Straight / right / left."},
+    {jp:"道に迷いました",romaji:"Michi ni mayoimashita",en:"I’m lost."},
+   ]},
+  {id:"dining", name:"Eating Out",
+   tip:"<b>No tipping — ever.</b> It’s not the custom and can cause confusion; great service is just standard. You usually pay at the register on the way out, not at the table. Slurping noodles is totally fine!",
+   items:[
+    {jp:"二人です",romaji:"Futari desu",en:"Two people (on entering)."},
+    {jp:"予約していません",romaji:"Yoyaku shite imasen",en:"We don’t have a reservation."},
+    {jp:"英語のメニューはありますか",romaji:"Eigo no menyū wa arimasu ka",en:"Is there an English menu?"},
+    {jp:"おすすめは何ですか",romaji:"Osusume wa nan desu ka",en:"What do you recommend?"},
+    {jp:"これをお願いします",romaji:"Kore o onegai shimasu",en:"This one, please (pointing at menu)."},
+    {jp:"同じものをお願いします",romaji:"Onaji mono o onegai shimasu",en:"The same, please."},
+    {jp:"お水をください",romaji:"Omizu o kudasai",en:"Water, please."},
+    {jp:"生ビールをお願いします",romaji:"Nama bīru o onegai shimasu",en:"A draft beer, please."},
+    {jp:"乾杯",romaji:"Kanpai",en:"Cheers!"},
+    {jp:"美味しい",romaji:"Oishii",en:"Delicious!"},
+    {jp:"肉は食べません",romaji:"Niku wa tabemasen",en:"I don’t eat meat."},
+    {jp:"ベジタリアンです",romaji:"Bejitarian desu",en:"I’m vegetarian."},
+    {jp:"…アレルギーがあります",romaji:"… arerugī ga arimasu",en:"I’m allergic to … (say the food first)."},
+    {jp:"辛くしないでください",romaji:"Karaku shinaide kudasai",en:"Not spicy, please."},
+    {jp:"持ち帰りできますか",romaji:"Mochikaeri dekimasu ka",en:"Can I take it away?"},
+    {jp:"お会計をお願いします",romaji:"Okaikei o onegai shimasu",en:"The bill, please."},
+    {jp:"別々でお願いします",romaji:"Betsubetsu de onegai shimasu",en:"Separate bills, please."},
+    {jp:"カードは使えますか",romaji:"Kādo wa tsukaemasu ka",en:"Can I use a card?"},
+   ]},
+  {id:"shop", name:"Konbini & Shops",
+   tip:"Japan still loves cash. Convenience stores (konbini) take cards, but small shops, markets and shrines often don’t — carry some yen. Staff may ask <b>“Fukuro?”</b> (bag?) and <b>“Atatamemasu ka?”</b> (heat it up?).",
+   items:[
+    {jp:"これはいくらですか",romaji:"Kore wa ikura desu ka",en:"How much is this?"},
+    {jp:"全部でいくらですか",romaji:"Zenbu de ikura desu ka",en:"How much altogether?"},
+    {jp:"これください",romaji:"Kore kudasai",en:"I’ll take this."},
+    {jp:"袋をください",romaji:"Fukuro o kudasai",en:"A bag, please."},
+    {jp:"袋はいりません",romaji:"Fukuro wa irimasen",en:"I don’t need a bag."},
+    {jp:"温めてください",romaji:"Atatamete kudasai",en:"Please heat it up (konbini food)."},
+    {jp:"お箸をください",romaji:"Ohashi o kudasai",en:"Chopsticks, please."},
+    {jp:"カードで払います",romaji:"Kādo de haraimasu",en:"I’ll pay by card."},
+    {jp:"現金で払います",romaji:"Genkin de haraimasu",en:"I’ll pay with cash."},
+    {jp:"レシートをください",romaji:"Reshīto o kudasai",en:"A receipt, please."},
+    {jp:"試着してもいいですか",romaji:"Shichaku shite mo ii desu ka",en:"May I try this on?"},
+    {jp:"免税できますか",romaji:"Menzei dekimasu ka",en:"Can I get this tax-free?"},
+    {jp:"見ているだけです",romaji:"Mite iru dake desu",en:"Just looking, thanks."},
+   ]},
+  {id:"stay", name:"Hotel & Onsen",
+   tip:"Many <b>onsen</b> (hot springs) don’t allow tattoos. If you have one, ask first, look for a tattoo-friendly bath, or cover a small one with a patch. Wash thoroughly before getting in — the bath is for soaking, not scrubbing.",
+   items:[
+    {jp:"予約しています",romaji:"Yoyaku shite imasu",en:"I have a reservation."},
+    {jp:"チェックインお願いします",romaji:"Chekku-in onegai shimasu",en:"Check-in, please."},
+    {jp:"荷物を預かってもらえますか",romaji:"Nimotsu o azukatte moraemasu ka",en:"Can you hold my luggage?"},
+    {jp:"Wi-Fiのパスワードは何ですか",romaji:"Wai-Fai no pasuwādo wa nan desu ka",en:"What’s the Wi-Fi password?"},
+    {jp:"朝食は何時ですか",romaji:"Chōshoku wa nanji desu ka",en:"What time is breakfast?"},
+    {jp:"チェックアウトは何時ですか",romaji:"Chekku-auto wa nanji desu ka",en:"What time is check-out?"},
+    {jp:"タオルをもう一枚ください",romaji:"Taoru o mō ichimai kudasai",en:"One more towel, please."},
+    {jp:"部屋が寒いです",romaji:"Heya ga samui desu",en:"The room is cold (handy in winter)."},
+    {jp:"お風呂はどこですか",romaji:"Ofuro wa doko desu ka",en:"Where’s the bath?"},
+    {jp:"温泉に入りたいです",romaji:"Onsen ni hairitai desu",en:"I’d like to use the hot spring."},
+    {jp:"タトゥーがあります",romaji:"Tatū ga arimasu",en:"I have a tattoo (ask before the onsen)."},
+   ]},
+  {id:"help", name:"Health & Help",
+   tip:"Emergency numbers: <b>110</b> for police, <b>119</b> for fire &amp; ambulance. Pharmacies (薬局) handle minor ailments; look for a <b>交番</b> (police box) if you’re lost or need help — they’re everywhere and very helpful.",
+   items:[
+    {jp:"助けてください",romaji:"Tasukete kudasai",en:"Help me, please."},
+    {jp:"警察を呼んでください",romaji:"Keisatsu o yonde kudasai",en:"Please call the police."},
+    {jp:"救急車を呼んでください",romaji:"Kyūkyūsha o yonde kudasai",en:"Please call an ambulance."},
+    {jp:"病院はどこですか",romaji:"Byōin wa doko desu ka",en:"Where’s a hospital?"},
+    {jp:"薬局はどこですか",romaji:"Yakkyoku wa doko desu ka",en:"Where’s a pharmacy?"},
+    {jp:"気分が悪いです",romaji:"Kibun ga warui desu",en:"I feel unwell."},
+    {jp:"お腹が痛いです",romaji:"Onaka ga itai desu",en:"My stomach hurts."},
+    {jp:"頭が痛いです",romaji:"Atama ga itai desu",en:"I have a headache."},
+    {jp:"財布をなくしました",romaji:"Saifu o nakushimashita",en:"I lost my wallet."},
+    {jp:"パスポートをなくしました",romaji:"Pasupōto o nakushimashita",en:"I lost my passport."},
+    {jp:"大使館に電話したいです",romaji:"Taishikan ni denwa shitai desu",en:"I need to phone my embassy."},
+    {jp:"危ない",romaji:"Abunai",en:"Watch out! / Danger!"},
+   ]},
+  {id:"numbers", name:"Numbers & Counting",
+   tip:"Big numbers group by <b>man</b> (10,000), not thousands — so ¥30,000 is “san-man en.” To order, hold up fingers and say the count + <b>kudasai</b>: “Futatsu kudasai” = two, please.",
+   items:[
+    {jp:"一",romaji:"Ichi",en:"1"},{jp:"二",romaji:"Ni",en:"2"},{jp:"三",romaji:"San",en:"3"},
+    {jp:"四",romaji:"Yon / Shi",en:"4"},{jp:"五",romaji:"Go",en:"5"},{jp:"六",romaji:"Roku",en:"6"},
+    {jp:"七",romaji:"Nana / Shichi",en:"7"},{jp:"八",romaji:"Hachi",en:"8"},{jp:"九",romaji:"Kyū",en:"9"},
+    {jp:"十",romaji:"Jū",en:"10"},{jp:"百",romaji:"Hyaku",en:"100"},{jp:"千",romaji:"Sen",en:"1,000"},
+    {jp:"一万",romaji:"Ichi-man",en:"10,000"},{jp:"円",romaji:"En",en:"Yen (¥)"},
+    {jp:"一つ",romaji:"Hitotsu",en:"One (item) — “Hitotsu kudasai.”"},
+    {jp:"二つ",romaji:"Futatsu",en:"Two (items)."},
+    {jp:"三つ",romaji:"Mittsu",en:"Three (items)."},
+   ]},
+];
+
+// Sign / word reading recognition — spot these on menus, streets and stations
+const SIGNS = [
+  // Food & drink
+  {jp:"ラーメン",romaji:"Rāmen",en:"Ramen"},
+  {jp:"寿司",romaji:"Sushi",en:"Sushi"},
+  {jp:"うどん",romaji:"Udon",en:"Udon noodles"},
+  {jp:"そば",romaji:"Soba",en:"Soba noodles"},
+  {jp:"焼き鳥",romaji:"Yakitori",en:"Grilled chicken skewers"},
+  {jp:"定食",romaji:"Teishoku",en:"Set meal"},
+  {jp:"弁当",romaji:"Bentō",en:"Boxed meal"},
+  {jp:"ご飯",romaji:"Gohan",en:"Rice / meal"},
+  {jp:"肉",romaji:"Niku",en:"Meat"},
+  {jp:"魚",romaji:"Sakana",en:"Fish"},
+  {jp:"鶏",romaji:"Tori",en:"Chicken"},
+  {jp:"豚",romaji:"Buta",en:"Pork"},
+  {jp:"牛",romaji:"Gyū",en:"Beef"},
+  {jp:"野菜",romaji:"Yasai",en:"Vegetables"},
+  {jp:"水",romaji:"Mizu",en:"Water"},
+  {jp:"お茶",romaji:"Ocha",en:"Tea"},
+  {jp:"日本酒",romaji:"Nihonshu",en:"Sake (rice wine)"},
+  {jp:"ビール",romaji:"Bīru",en:"Beer"},
+  // Getting around
+  {jp:"駅",romaji:"Eki",en:"Station"},
+  {jp:"電車",romaji:"Densha",en:"Train"},
+  {jp:"地下鉄",romaji:"Chikatetsu",en:"Subway"},
+  {jp:"バス",romaji:"Basu",en:"Bus"},
+  {jp:"空港",romaji:"Kūkō",en:"Airport"},
+  {jp:"入口",romaji:"Iriguchi",en:"Entrance"},
+  {jp:"出口",romaji:"Deguchi",en:"Exit"},
+  {jp:"北 / 南",romaji:"Kita / Minami",en:"North / South"},
+  {jp:"東 / 西",romaji:"Higashi / Nishi",en:"East / West"},
+  // Places
+  {jp:"トイレ",romaji:"Toire",en:"Toilet"},
+  {jp:"お手洗い",romaji:"Otearai",en:"Restroom"},
+  {jp:"男",romaji:"Otoko",en:"Men"},
+  {jp:"女",romaji:"Onna",en:"Women"},
+  {jp:"コンビニ",romaji:"Konbini",en:"Convenience store"},
+  {jp:"銀行",romaji:"Ginkō",en:"Bank"},
+  {jp:"病院",romaji:"Byōin",en:"Hospital"},
+  {jp:"薬局",romaji:"Yakkyoku",en:"Pharmacy"},
+  {jp:"交番",romaji:"Kōban",en:"Police box"},
+  // Signs & status
+  {jp:"営業中",romaji:"Eigyōchū",en:"Open (for business)"},
+  {jp:"準備中",romaji:"Junbichū",en:"Closed / preparing"},
+  {jp:"閉店",romaji:"Heiten",en:"Closed / shut"},
+  {jp:"押す / 引く",romaji:"Osu / Hiku",en:"Push / Pull"},
+  {jp:"危険",romaji:"Kiken",en:"Danger"},
+  {jp:"立入禁止",romaji:"Tachiiri kinshi",en:"No entry"},
+  {jp:"禁煙",romaji:"Kin'en",en:"No smoking"},
+  {jp:"無料",romaji:"Muryō",en:"Free (no charge)"},
+  {jp:"お金",romaji:"Okane",en:"Money"},
+  {jp:"現金",romaji:"Genkin",en:"Cash"},
+  {jp:"会計",romaji:"Kaikei",en:"Cashier / bill"},
+  {jp:"円",romaji:"En",en:"Yen (¥)"},
+];
+
+/* ---------- SPEECH (offline device TTS) ---------- */
+// Voices differ per device. Prefer a clear female voice; let the user override.
+const FEMALE_HINT = /kyoko|haruka|nanami|ayumi|sayaka|o-?ren|mizuki|female|women|\bf\d/i;
+const MALE_HINT   = /otoya|hattori|ichiro|\bmale\b|\bm\d/i;
+let jaVoices = [], jaVoice = null;
+
+function scoreVoice(v){
+  const n = v.name || "";
+  let s = 0;
+  if(MALE_HINT.test(n)) s -= 10;          // avoid the low male voice
+  if(FEMALE_HINT.test(n)) s += 10;        // prefer clearly female
+  if(/google/i.test(n)) s += 4;           // Android's ja voice (clear, female-sounding)
+  if(/enhanced|premium|siri/i.test(n)) s += 3;
+  return s;
+}
+function friendlyName(v){
+  const base = (v.name||"Voice").replace(/\s*\(.*?\)\s*/g," ").replace(/\s+/g," ").trim();
+  const tag = MALE_HINT.test(v.name) ? " ♂" : (FEMALE_HINT.test(v.name)||/google/i.test(v.name) ? " ♀" : "");
+  return base + tag;
+}
+function loadVoices(){
+  jaVoices = speechSynthesis.getVoices().filter(v => (v.lang||"").toLowerCase().startsWith("ja"));
+  const saved = localStorage.getItem("jpVoiceName");
+  jaVoice = jaVoices.find(v=>v.name===saved)
+         || jaVoices.slice().sort((a,b)=>scoreVoice(b)-scoreVoice(a))[0]
+         || null;
+  drawVoiceOptions();
+}
+function drawVoiceOptions(){
+  const sel = document.getElementById("voice");
+  if(!sel) return;
+  if(!jaVoices.length){ sel.innerHTML='<option>Using device default</option>'; sel.disabled=true; return; }
+  sel.disabled=false; sel.innerHTML="";
+  jaVoices.slice().sort((a,b)=>scoreVoice(b)-scoreVoice(a)).forEach(v=>{
+    const o=document.createElement("option");
+    o.value=v.name; o.textContent=friendlyName(v);
+    if(jaVoice && v.name===jaVoice.name) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+if("speechSynthesis" in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function say(text, btn){
+  if(!("speechSynthesis" in window)){ alert("Your browser can’t do voice. On your iPhone/Android the installed app can."); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/…/g,"").replace(/\s*\/\s*/g,"、"));
+  u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=0.85; u.pitch=1.0;
+  if(btn){ document.querySelectorAll(".say.playing").forEach(b=>b.classList.remove("playing"));
+    btn.classList.add("playing"); u.onend=u.onerror=()=>btn.classList.remove("playing"); }
+  speechSynthesis.speak(u);
+}
+
+/* ---------- RENDER ---------- */
+const TABS = [{id:"all",name:"All"}, ...CATS.map(c=>({id:c.id,name:c.name})), {id:"reading",name:"読む Reading"}];
+let activeTab="essentials", query="";
+const tabsEl=document.getElementById("tabs"), mainEl=document.getElementById("main"), searchEl=document.getElementById("search");
+
+function drawTabs(){
+  tabsEl.innerHTML="";
+  TABS.forEach(t=>{
+    const b=document.createElement("button");
+    b.className="tab"+(t.id===activeTab?" active":""); b.textContent=t.name;
+    b.onclick=()=>{activeTab=t.id; query=""; searchEl.value=""; document.body.classList.remove("quiz"); drawTabs(); render(); window.scrollTo(0,0);};
+    tabsEl.appendChild(b);
+  });
+}
+
+function speaker(text){
+  const b=document.createElement("button");
+  b.className="say"; b.setAttribute("aria-label","Play pronunciation"); b.textContent="🔊";
+  b.onclick=(e)=>{e.stopPropagation(); say(text,b);};
+  return b;
+}
+
+function phraseCard(it){
+  const card=document.createElement("div"); card.className="card";
+  const txt=document.createElement("div"); txt.className="txt";
+  txt.innerHTML=`<div class="jp">${it.jp}</div><div class="romaji">${it.romaji}</div><div class="en">${it.en}</div>`+
+    (it.note?`<div class="note">💡 ${it.note}</div>`:"");
+  card.appendChild(txt); card.appendChild(speaker(it.jp));
+  return card;
+}
+
+function matches(it){
+  if(!query) return true;
+  const q=query.toLowerCase();
+  return it.jp.toLowerCase().includes(q)||it.romaji.toLowerCase().includes(q)||it.en.toLowerCase().includes(q);
+}
+
+function render(){
+  mainEl.innerHTML="";
+  if(activeTab==="reading"){ renderReading(); return; }
+  let cats = activeTab==="all" ? CATS : CATS.filter(c=>c.id===activeTab);
+  let any=false;
+  cats.forEach(c=>{
+    const items=c.items.filter(matches);
+    if(!items.length) return;
+    any=true;
+    const h=document.createElement("div"); h.className="sec-title"; h.textContent=c.name; mainEl.appendChild(h);
+    if(c.tip && !query){ const t=document.createElement("div"); t.className="tip"; t.innerHTML=c.tip; mainEl.appendChild(t); }
+    items.forEach(it=>mainEl.appendChild(phraseCard(it)));
+  });
+  if(!any) mainEl.innerHTML=`<div class="empty">No matches for “${query}”.<br>Try “bill”, “toilet”, or “thank”.</div>`;
+}
+
+function renderReading(){
+  const help=document.createElement("div"); help.className="reading-help";
+  help.innerHTML="Learn to spot the words on signs and menus. Tap a card to hear it. Flip on <b>Test me</b> to hide the answers.";
+  mainEl.appendChild(help);
+
+  const tog=document.createElement("label"); tog.className="toggle";
+  tog.innerHTML=`<input type="checkbox" id="quiz"> Test me — hide meanings`;
+  mainEl.appendChild(tog);
+  tog.querySelector("input").onchange=e=>{
+    document.body.classList.toggle("quiz", e.target.checked);
+    mainEl.querySelectorAll(".sign").forEach(s=>s.classList.remove("revealed"));
+  };
+
+  const grid=document.createElement("div"); grid.className="grid";
+  SIGNS.filter(matches).forEach(s=>{
+    const el=document.createElement("div"); el.className="sign";
+    el.innerHTML=`<div class="big">${s.jp}</div><div class="r">${s.romaji}</div><div class="e">${s.en}</div>`;
+    el.appendChild(speaker(s.jp));
+    el.onclick=()=>{ if(document.body.classList.contains("quiz")) el.classList.toggle("revealed"); say(s.jp); };
+    grid.appendChild(el);
+  });
+  mainEl.appendChild(grid);
+}
+
+searchEl.oninput=e=>{ query=e.target.value.trim();
+  if(query && activeTab!=="reading" && activeTab!=="all"){ activeTab="all"; drawTabs(); }
+  render();
+};
+
+drawTabs(); render();
+
+/* voice picker wiring */
+const voiceSel=document.getElementById("voice"), voiceTest=document.getElementById("voiceTest");
+voiceSel.onchange=e=>{
+  jaVoice = jaVoices.find(v=>v.name===e.target.value) || null;
+  if(jaVoice) localStorage.setItem("jpVoiceName", jaVoice.name);
+  say("こんにちは、はじめまして");
+};
+voiceTest.onclick=()=>say("こんにちは、はじめまして", null);
+
+/* ---------- PWA ---------- */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
