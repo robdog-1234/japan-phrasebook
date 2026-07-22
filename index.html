@@ -132,6 +132,10 @@
     <select id="voice" aria-label="Choose pronunciation voice"></select>
     <button class="test" id="voiceTest" type="button">Test</button>
   </div>
+  <div class="voicebar">
+    <label for="style">🎚️ Style</label>
+    <select id="style" aria-label="Choose voice style"></select>
+  </div>
   <div class="tabs" id="tabs"></div>
 </header>
 <main id="main"></main>
@@ -480,6 +484,19 @@ const FEMALE_HINT = /kyoko|haruka|nanami|ayumi|sayaka|o-?ren|mizuki|female|women
 const MALE_HINT   = /otoya|hattori|ichiro|\bmale\b|\bm\d/i;
 let jaVoices = [], jaVoice = null;
 
+// Playful pitch/speed presets applied on top of the device voice.
+// (Not the real Miku/Teto voicebanks — those are paid singing synths that
+//  can't run offline in a browser. The high presets get closest to that vibe.)
+const STYLES = [
+  {id:"natural", name:"Natural",              rate:0.85, pitch:1.0},
+  {id:"clear",   name:"Clear & slow",         rate:0.62, pitch:1.0},
+  {id:"bright",  name:"Bright & high ✨",      rate:0.95, pitch:1.6},
+  {id:"cute",    name:"Cute — extra high 🎤",  rate:1.0,  pitch:2.0},
+  {id:"chip",    name:"Chipmunk 🐿️",          rate:1.35, pitch:2.0},
+  {id:"deep",    name:"Deep & calm",           rate:0.8,  pitch:0.55},
+];
+let curStyle = STYLES[0];
+
 function scoreVoice(v){
   const n = v.name || "";
   let s = 0;
@@ -523,7 +540,7 @@ function say(text, btn){
   if(!("speechSynthesis" in window)){ alert("Your browser can’t do voice. On your iPhone/Android the installed app can."); return; }
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text.replace(/…/g,"").replace(/\s*\/\s*/g,"、"));
-  u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=0.85; u.pitch=1.0;
+  u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=curStyle.rate; u.pitch=curStyle.pitch;
   if(btn){ document.querySelectorAll(".say.playing").forEach(b=>b.classList.remove("playing"));
     btn.classList.add("playing"); u.onend=u.onerror=()=>btn.classList.remove("playing"); }
   speechSynthesis.speak(u);
@@ -621,6 +638,25 @@ voiceSel.onchange=e=>{
   say("こんにちは、はじめまして");
 };
 voiceTest.onclick=()=>say("こんにちは、はじめまして", null);
+
+/* voice-style picker wiring */
+const styleSel=document.getElementById("style");
+(function initStyles(){
+  const saved=localStorage.getItem("voiceStyle");
+  curStyle = STYLES.find(s=>s.id===saved) || STYLES[0];
+  styleSel.innerHTML="";
+  STYLES.forEach(s=>{
+    const o=document.createElement("option");
+    o.value=s.id; o.textContent=s.name;
+    if(s.id===curStyle.id) o.selected=true;
+    styleSel.appendChild(o);
+  });
+})();
+styleSel.onchange=e=>{
+  curStyle = STYLES.find(s=>s.id===e.target.value) || STYLES[0];
+  try{ localStorage.setItem("voiceStyle", curStyle.id); }catch(err){}
+  say("こんにちは、はじめまして");
+};
 
 /* night-mode toggle */
 const themeBtn=document.getElementById("themeBtn");

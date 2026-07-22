@@ -1,5 +1,5 @@
 // Service worker: cache everything so the app works fully offline.
-const CACHE = 'japan-phrasebook-v8';
+const CACHE = 'japan-phrasebook-v9';
 const ASSETS = [
   './',
   './index.html',
