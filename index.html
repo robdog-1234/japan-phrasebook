@@ -10,18 +10,26 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Japan">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <style>
   :root{
     --bg:#f7f3e9; --card:#fffdf7; --ink:#1c1a17; --muted:#6b655c;
     --line:#e7e0d2; --red:#bc002d; --red-soft:#fbe9ec; --accent:#0a6b6b;
     --shadow:0 1px 2px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.06);
   }
+  /* auto dark (follows the phone) unless the user forced light */
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#141210; --card:#1f1c19; --ink:#f2ede3; --muted:#a49c8e;
       --line:#332e28; --red:#ff5a76; --red-soft:#31191f; --accent:#5fd0d0;
       --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.4);
     }
+  }
+  /* manual night mode (toggle button) — always wins */
+  :root[data-theme="dark"]{
+    --bg:#141210; --card:#1f1c19; --ink:#f2ede3; --muted:#a49c8e;
+    --line:#332e28; --red:#ff5a76; --red-soft:#31191f; --accent:#5fd0d0;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.4);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0}
@@ -36,6 +44,12 @@
   }
   .brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .sun{width:26px;height:26px;border-radius:50%;background:var(--red);flex:none}
+  .theme-btn{
+    margin-left:auto;flex:none;width:40px;height:40px;border-radius:50%;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);
+    font-size:18px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:transform .08s;
+  }
+  .theme-btn:active{transform:scale(.9)}
   h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.2px}
   h1 small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
   #search{
@@ -110,6 +124,7 @@
   <div class="brand">
     <div class="sun"></div>
     <h1>Japan Phrasebook<small>Tap 🔊 to hear it · works offline</small></h1>
+    <button id="themeBtn" class="theme-btn" type="button" aria-label="Toggle night mode">🌙</button>
   </div>
   <input id="search" type="search" placeholder="Search English, romaji, or Japanese…" autocomplete="off">
   <div class="voicebar">
@@ -606,6 +621,33 @@ voiceSel.onchange=e=>{
   say("こんにちは、はじめまして");
 };
 voiceTest.onclick=()=>say("こんにちは、はじめまして", null);
+
+/* night-mode toggle */
+const themeBtn=document.getElementById("themeBtn");
+function effectiveDark(){
+  const t=document.documentElement.dataset.theme;
+  if(t==="dark") return true;
+  if(t==="light") return false;
+  return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function updateThemeIcon(){
+  const dark=effectiveDark();
+  themeBtn.textContent = dark ? "☀️" : "🌙";
+  themeBtn.setAttribute("aria-label", dark ? "Switch to day mode" : "Switch to night mode");
+}
+themeBtn.onclick=()=>{
+  const goDark=!effectiveDark();
+  document.documentElement.dataset.theme = goDark ? "dark" : "light";
+  try{ localStorage.setItem("theme", goDark ? "dark" : "light"); }catch(e){}
+  updateThemeIcon();
+};
+updateThemeIcon();
+if(window.matchMedia){
+  const mq=window.matchMedia("(prefers-color-scheme: dark)");
+  (mq.addEventListener ? mq.addEventListener.bind(mq,"change") : mq.addListener.bind(mq))(()=>{
+    if(!document.documentElement.dataset.theme) updateThemeIcon();
+  });
+}
 
 /* ---------- PWA ---------- */
 if("serviceWorker" in navigator){
